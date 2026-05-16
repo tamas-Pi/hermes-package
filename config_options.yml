@@ -1,0 +1,132 @@
+title: Hermes Local Configurator
+eyebrow: Developer Preflight
+description: >
+  Configure the local Docker Compose environment. This writes only .env;
+  docker-compose.yml turns those values into Hermes runtime config on container start.
+output_file: .env
+after_save: Saved. Run docker compose up -d --force-recreate when ready.
+footer_hint: Then run docker compose up -d --force-recreate.
+
+fixed_values:
+  - name: UID
+    detect: uid
+    env_comment: >
+      Current host user ID. The configurator detects this automatically so
+      container-written bind-mount files remain owned by your local user.
+  - name: GID
+    detect: gid
+    env_comment: >
+      Current host group ID. The configurator detects this automatically and
+      passes it to the containers together with UID for bind-mount permissions.
+  - name: HERMES_HOME
+    value: ./local/container-data/hermes-home
+    env_comment: >
+      Host path mounted as Hermes home. It stores generated config.yaml,
+      sessions, skills, logs, auth files, and persistent agent state.
+  - name: HERMES_WORKSPACE
+    value: ./local/container-data/workspace
+    env_comment: >
+      Host path mounted at /workspace in the WebUI container for browsing and
+      editing files from the UI.
+
+fields:
+  - name: HERMES_MODEL_PROVIDER
+    label: Model provider
+    type: select
+    default: dmr
+    env_comment: >
+      Selects which model backend Hermes should use. The agent bootstrap reads
+      this and generates the matching model section in config.yaml.
+    options:
+      - value: dmr
+        label: Docker Model Runner
+        set:
+          HERMES_MODEL: gemma4
+          HERMES_BASE_URL: ""
+          HERMES_DMR_MODEL: gemma4
+          HERMES_DMR_URL: ""
+          HERMES_DMR_API_KEY: docker-model-runner
+      - value: anthropic
+        label: Anthropic
+        set:
+          HERMES_MODEL: claude-sonnet-4.6
+          HERMES_BASE_URL: ""
+          HERMES_DMR_MODEL: gemma4
+          HERMES_DMR_URL: http://modelrunner.docker.internal:12434/engines/v1
+          HERMES_DMR_API_KEY: docker-model-runner
+      - value: openai
+        label: OpenAI
+        set:
+          HERMES_MODEL: gpt-4o
+          HERMES_BASE_URL: https://api.openai.com/v1
+          HERMES_DMR_MODEL: gemma4
+          HERMES_DMR_URL: http://modelrunner.docker.internal:12434/engines/v1
+          HERMES_DMR_API_KEY: docker-model-runner
+      - value: custom
+        label: Custom OpenAI-compatible
+        set:
+          HERMES_MODEL: gpt-4o-mini
+          HERMES_BASE_URL: http://localhost:1234/v1
+          HERMES_DMR_MODEL: gemma4
+          HERMES_DMR_URL: http://modelrunner.docker.internal:12434/engines/v1
+          HERMES_DMR_API_KEY: docker-model-runner
+
+  - name: HERMES_MODEL
+    label: Model
+    type: text
+    default: gemma4
+    required: true
+    env_comment: >
+      Model name passed to Hermes. For Docker Model Runner this is normally
+      gemma4; for remote providers use the provider's model identifier.
+
+  - name: HERMES_BASE_URL
+    label: Base URL
+    type: text
+    default: ""
+    help: Used for OpenAI and custom OpenAI-compatible providers. Docker Model Runner gets its container endpoint from Docker Compose.
+    env_comment: >
+      OpenAI-compatible API base URL for OpenAI or custom providers. Leave blank
+      for Docker Model Runner because Compose injects HERMES_DMR_URL.
+    visible_if:
+      field: HERMES_MODEL_PROVIDER
+      in: [openai, custom]
+
+  - name: HERMES_API_KEY
+    label: API key
+    type: password
+    preserve_if_blank: true
+    invalid_preserve_values: [docker-model-runner]
+    help: Leave blank to keep an existing value in .env.
+    env_comment: >
+      API key for the selected remote provider. Leave blank for Docker Model
+      Runner; its dummy token is stored separately in HERMES_DMR_API_KEY.
+
+  - name: HERMES_WEBUI_PASSWORD
+    label: Optional WebUI password
+    type: password
+    preserve_if_blank: true
+    env_comment: >
+      Optional password for the WebUI. Set this before exposing the WebUI beyond
+      localhost.
+
+  - name: HERMES_DMR_MODEL
+    type: hidden
+    default: gemma4
+    env_comment: >
+      Docker Model Runner model requested by Compose's models integration.
+      Kept as gemma4 even when using remote providers so switching back is easy.
+
+  - name: HERMES_DMR_URL
+    type: hidden
+    default: ""
+    env_comment: >
+      Docker Model Runner endpoint override. Usually blank: Docker Compose
+      injects the working in-container endpoint automatically.
+
+  - name: HERMES_DMR_API_KEY
+    type: hidden
+    default: docker-model-runner
+    env_comment: >
+      Dummy bearer token for Docker Model Runner's OpenAI-compatible API.
+      Docker Model Runner ignores it, but Hermes expects a configured key.
