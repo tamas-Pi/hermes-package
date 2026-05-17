@@ -41,9 +41,9 @@ fields:
       - value: dmr
         label: Docker Model Runner
         set:
-          HERMES_MODEL: gemma4
+          HERMES_MODEL: ai/gemma3:1B-Q4_K_M
           HERMES_BASE_URL: ""
-          HERMES_DMR_MODEL: gemma4
+          HERMES_DMR_MODEL: ai/gemma3:1B-Q4_K_M
           HERMES_DMR_URL: ""
           HERMES_DMR_API_KEY: docker-model-runner
       - value: anthropic
@@ -51,7 +51,7 @@ fields:
         set:
           HERMES_MODEL: claude-sonnet-4.6
           HERMES_BASE_URL: ""
-          HERMES_DMR_MODEL: gemma4
+          HERMES_DMR_MODEL: ai/gemma3:1B-Q4_K_M
           HERMES_DMR_URL: http://modelrunner.docker.internal:12434/engines/v1
           HERMES_DMR_API_KEY: docker-model-runner
       - value: openai
@@ -59,7 +59,7 @@ fields:
         set:
           HERMES_MODEL: gpt-4o
           HERMES_BASE_URL: https://api.openai.com/v1
-          HERMES_DMR_MODEL: gemma4
+          HERMES_DMR_MODEL: ai/gemma3:1B-Q4_K_M
           HERMES_DMR_URL: http://modelrunner.docker.internal:12434/engines/v1
           HERMES_DMR_API_KEY: docker-model-runner
       - value: custom
@@ -67,18 +67,18 @@ fields:
         set:
           HERMES_MODEL: gpt-4o-mini
           HERMES_BASE_URL: http://localhost:1234/v1
-          HERMES_DMR_MODEL: gemma4
+          HERMES_DMR_MODEL: ai/gemma3:1B-Q4_K_M
           HERMES_DMR_URL: http://modelrunner.docker.internal:12434/engines/v1
           HERMES_DMR_API_KEY: docker-model-runner
 
   - name: HERMES_MODEL
     label: Model
     type: text
-    default: gemma4
+    default: ai/gemma3:1B-Q4_K_M
     required: true
     env_comment: >
       Model name passed to Hermes. For Docker Model Runner this is normally
-      gemma4; for remote providers use the provider's model identifier.
+      ai/gemma3:1B-Q4_K_M; for remote providers use the provider's model identifier.
 
   - name: HERMES_BASE_URL
     label: Base URL
@@ -112,10 +112,10 @@ fields:
 
   - name: HERMES_DMR_MODEL
     type: hidden
-    default: gemma4
+    default: ai/gemma3:1B-Q4_K_M
     env_comment: >
       Docker Model Runner model requested by Compose's models integration.
-      Kept as gemma4 even when using remote providers so switching back is easy.
+      Kept as ai/gemma3:1B-Q4_K_M even when using remote providers so switching back is easy.
 
   - name: HERMES_DMR_URL
     type: hidden

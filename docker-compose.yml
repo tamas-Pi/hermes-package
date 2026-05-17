@@ -19,7 +19,7 @@ services:
             "HERMES_DMR_URL",
             "http://modelrunner.docker.internal:12434/engines/v1",
         ).rstrip("/")
-        dmr_model = os.environ.get("HERMES_DMR_MODEL", "gemma4")
+        dmr_model = os.environ.get("HERMES_DMR_MODEL", "ai/gemma3:1B-Q4_K_M")
         dmr_api_key = os.environ.get("HERMES_DMR_API_KEY", "docker-model-runner")
         model = os.environ.get("HERMES_MODEL") or dmr_model
         base_url = (os.environ.get("HERMES_BASE_URL") or "").rstrip("/")
@@ -116,7 +116,7 @@ services:
     ports:
       - "127.0.0.1:18642:8642"
     volumes:
-      - ${HERMES_HOME:-./local/container-data/hermes-home}:/home/hermes/.hermes
+      - hermes-home:/home/hermes/.hermes
       - hermes-agent-src:/opt/hermes
     environment:
       - HERMES_HOME=/home/hermes/.hermes
@@ -127,7 +127,7 @@ services:
       - HERMES_BASE_URL=${HERMES_BASE_URL:-}
       - HERMES_API_KEY=${HERMES_API_KEY:-}
       - HERMES_DMR_URL=${HERMES_DMR_URL:-http://modelrunner.docker.internal:12434/engines/v1}
-      - HERMES_DMR_MODEL=${HERMES_DMR_MODEL:-gemma4}
+      - HERMES_DMR_MODEL=${HERMES_DMR_MODEL:-ai/gemma3:1B-Q4_K_M}
       - HERMES_DMR_API_KEY=${HERMES_DMR_API_KEY:-docker-model-runner}
     restart: unless-stopped
     networks:
@@ -147,9 +147,9 @@ services:
     ports:
       - "127.0.0.1:18787:8787"
     volumes:
-      - ${HERMES_HOME:-./local/container-data/hermes-home}:/home/hermeswebui/.hermes
+      - hermes-home:/home/hermeswebui/.hermes
       - hermes-agent-src:/home/hermeswebui/.hermes/hermes-agent
-      - ${HERMES_WORKSPACE:-./local/container-data/workspace}:/workspace
+      - hermes-workspace:/workspace
     environment:
       - HERMES_WEBUI_HOST=0.0.0.0
       - HERMES_WEBUI_PORT=8787
@@ -167,8 +167,10 @@ networks:
 
 volumes:
   hermes-agent-src:
+  hermes-home:
+  hermes-workspace:
 
 models:
   hermes-llm:
-    model: ${HERMES_DMR_MODEL:-gemma4}
+    model: ${HERMES_DMR_MODEL:-ai/gemma3:1B-Q4_K_M}
     context_size: 65536
