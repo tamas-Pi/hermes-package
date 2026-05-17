@@ -116,7 +116,7 @@ services:
     ports:
       - "127.0.0.1:18642:8642"
     volumes:
-      - hermes-home:/home/hermes/.hermes
+      - ${HERMES_HOME:-./local/container-data/hermes-home}:/home/hermes/.hermes
       - hermes-agent-src:/opt/hermes
     environment:
       - HERMES_HOME=/home/hermes/.hermes
@@ -147,9 +147,9 @@ services:
     ports:
       - "127.0.0.1:18787:8787"
     volumes:
-      - hermes-home:/home/hermeswebui/.hermes
+      - ${HERMES_HOME:-./local/container-data/hermes-home}:/home/hermeswebui/.hermes
       - hermes-agent-src:/home/hermeswebui/.hermes/hermes-agent
-      - hermes-workspace:/workspace
+      - ${HERMES_WORKSPACE:-./local/container-data/workspace}:/workspace
     environment:
       - HERMES_WEBUI_HOST=0.0.0.0
       - HERMES_WEBUI_PORT=8787
@@ -167,8 +167,6 @@ networks:
 
 volumes:
   hermes-agent-src:
-  hermes-home:
-  hermes-workspace:
 
 models:
   hermes-llm:
